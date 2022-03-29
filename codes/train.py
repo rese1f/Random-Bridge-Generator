@@ -8,19 +8,10 @@ from segmentation_models_pytorch.datasets import TokaidoDataset
 
 if __name__ == '__main__':
 
-    comp_dataset = TokaidoDataset(
-        images_dir = r'C:/Users/Reself/Downloads/Tokaido/img_syn_raw/train/',
-        masks_dir =  r'C:/Users/Reself/Downloads/Tokaido/synthetic/train/labcmp/',
-        classes = ['nonbridge', 
-                'slab', 
-                'beam', 
-                'column', 
-                'nonstructural components', 
-                'rail', 
-                'sleeper', 
-                'others'],
+    train_dataset = TokaidoDataset(
+        map_dir = r'C:/Users/Reself/Downloads/Tokaido/files_train.csv',
+        root_dir =  r'C:/Users/Reself/Downloads/Tokaido/',
         augmentation = True,
-        preprocessing = True,
     )
-
-    comp_dataset.__getitem__(0)
+    
+    

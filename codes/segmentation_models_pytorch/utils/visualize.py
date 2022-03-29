@@ -1,4 +1,7 @@
 # helper function for data visualization
+
+import matplotlib.pyplot as plt
+
 def visualize(**images):
     """PLot images in one row."""
     n = len(images)
