@@ -5,6 +5,9 @@ import segmentation_models_pytorch as smp
 
 from torch.utils.data import DataLoader
 from segmentation_models_pytorch.datasets import TokaidoDataset
+from segmentation_models_pytorch.utils import visualize
+
+import pdb
 
 if __name__ == '__main__':
 
@@ -14,4 +17,10 @@ if __name__ == '__main__':
         augmentation = True,
     )
     
-    
+    # model = smp.FPN(
+    #         encoder_name='resnet34', 
+    #         encoder_weights=None,
+    #         in_channels=3, 
+    #         classes=8, 
+    #         activation='sigmoid',
+    # )

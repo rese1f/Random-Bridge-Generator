@@ -7,18 +7,6 @@ import cv2
 import pandas as pd
 
 class TokaidoDataset(BaseDataset):
-    """
-    Args:
-        images_dir (str): path to images folder
-        masks_dir (str): path to segmentation masks folder
-        class_values (list): values of classes to extract from segmentation mask
-        augmentation (albumentations.Compose): data transfromation pipeline 
-            (e.g. flip, scale, etc.)
-        preprocessing (albumentations.Compose): data preprocessing 
-            (e.g. noralization, shape manipulation, etc.)
-    
-    """
-
     def __init__(
             self,
             root_dir, 
@@ -44,25 +32,30 @@ class TokaidoDataset(BaseDataset):
     
     def __getitem__(self, i):
         
-        img = cv2.imread(self.image_ids[i], flags=-1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        basic_transforms = transforms.Compose([
+        img_transforms = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], 
-                                 [0.229, 0.224, 0.225])
+                                 [0.229, 0.224, 0.225]),
+            transforms.Resize([320,640]),
             ])
-        img = basic_transforms(img)
+        
+        label_transforms = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize([320,640],interpolation=2)
+            ])
+        
+        img = cv2.imread(self.image_ids[i], flags=-1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = img_transforms(img)
         
         cmp = cv2.imread(self.cmp_ids[i], flags=-1)
-        cmp = np.array(cmp)
-        cmp = torch.tensor(cmp)
+        cmp = label_transforms(cmp) * 255
         
         dmg = cv2.imread(self.dmg_ids[i], flags=-1)
-        dmg = np.array(dmg)
-        dmg = torch.tensor(dmg)
+        dmg = label_transforms(dmg) * 255
         
         depth = cv2.imread(self.depth_ids[i], flags=-1)
-        depth = np.array(depth)/(2**16-1)*(30-0.5)+0.5
+        depth = np.array(depth) / (2**16 - 1) * (30 - 0.5) + 0.5
         depth = torch.tensor(depth)
         
         # apply augmentations
@@ -75,7 +68,6 @@ class TokaidoDataset(BaseDataset):
             cmp = aug_transforms(cmp)
             dmg = aug_transforms(dmg)
             depth = aug_transforms(depth)
-            raw_img = aug_transforms(raw_img)
             
         return img, cmp, dmg, depth, self.image_ids[i]
         
