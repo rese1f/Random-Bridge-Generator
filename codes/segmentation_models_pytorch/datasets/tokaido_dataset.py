@@ -34,14 +34,9 @@ class TokaidoDataset(BaseDataset):
         
         img_transforms = transforms.Compose([
             transforms.ToTensor(),
+            transforms.Resize([320,640]),
             transforms.Normalize([0.485, 0.456, 0.406], 
                                  [0.229, 0.224, 0.225]),
-            transforms.Resize([320,640]),
-            ])
-        
-        label_transforms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize([320,640],interpolation=2)
             ])
         
         img = cv2.imread(self.image_ids[i], flags=-1)
@@ -49,14 +44,20 @@ class TokaidoDataset(BaseDataset):
         img = img_transforms(img)
         
         cmp = cv2.imread(self.cmp_ids[i], flags=-1)
-        cmp = label_transforms(cmp) * 255
+        cmp = cv2.resize(src = cmp,
+                         dsize = (640,320), 
+                         interpolation = cv2.INTER_LINEAR)
+        cmp = torch.as_tensor(cmp)
         
         dmg = cv2.imread(self.dmg_ids[i], flags=-1)
-        dmg = label_transforms(dmg) * 255
+        dmg = cv2.resize(src = dmg,
+                         dsize = (640,320), 
+                         interpolation = cv2.INTER_LINEAR)
+        dmg = torch.as_tensor(dmg)
         
         depth = cv2.imread(self.depth_ids[i], flags=-1)
         depth = np.array(depth) / (2**16 - 1) * (30 - 0.5) + 0.5
-        depth = torch.tensor(depth)
+        depth = torch.as_tensor(depth)
         
         # apply augmentations
         if self.augmentation:
@@ -69,7 +70,12 @@ class TokaidoDataset(BaseDataset):
             dmg = aug_transforms(dmg)
             depth = aug_transforms(depth)
             
-        return img, cmp, dmg, depth, self.image_ids[i]
+        # return img, cmp, dmg, depth, self.image_ids[i]
+        return img, cmp
         
     def __len__(self):
         return len(self.ids)
+    
+    @staticmethod
+    def onehot(label, N):
+        pass

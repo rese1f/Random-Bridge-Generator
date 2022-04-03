@@ -2,7 +2,6 @@ import os
 import torch
 import matplotlib.pyplot as plt
 import segmentation_models_pytorch as smp
-import pytorch_lightning as pl
 
 from torch.utils.data import DataLoader
 from configs import parse_args
@@ -23,7 +22,7 @@ if __name__ == '__main__':
     train_loader = DataLoader(dataset=train_dataset, 
                               batch_size=args.batch_size, 
                               shuffle=True, 
-                              num_workers=os.cpu_count())  # type: ignore
+                              num_workers=0)  # type: ignore os.cpu_count()
     
     model = smp.FPN(
             encoder_name=args.model, 
@@ -33,7 +32,7 @@ if __name__ == '__main__':
             activation='sigmoid',
     )
     
-    loss = smp.utils.losses.DiceLoss()
+    loss = smp.losses.DiceLoss(mode='multiclass', from_logits=True)
     metrics = [
         smp.utils.metrics.IoU(threshold=0.5),
     ]

@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument('--model', default='resnet50', type=str)
     
     # train
-    parser.add_argument('--batch-size', default=16, type=int)
+    parser.add_argument('--batch-size', default=8, type=int)
     parser.add_argument('--learning_rate', default=1e-3, type=float)
     parser.add_argument('--epoch', default=40, type=int)
     
