@@ -1,5 +1,6 @@
 import os
 import torch
+import torch.nn.functional as F
 import pytorch_lightning as pl
 import segmentation_models_pytorch as smp
 
@@ -19,7 +20,9 @@ class YasuoModel(pl.LightningModule):
         self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
 
         # for image segmentation dice loss could be the best first choice
-        self.loss_fn = smp.losses.DiceLoss(smp.losses.BINARY_MODE, from_logits=True)
+        self.loss_fn = smp.losses.DiceLoss(mode=smp.losses.MULTICLASS_MODE, 
+                                           from_logits=True,
+                                           ignore_index=0)
         self.lr = lr
 
     def forward(self, img):
@@ -55,15 +58,14 @@ class YasuoModel(pl.LightningModule):
         # Lets compute metrics for some threshold
         # first convert mask values to probabilities, then 
         # apply thresholding
-        pred_mask = (output.sigmoid() > 0.5).float()
-        
+        _, pred_mask = torch.max(output.sigmoid(),dim=1,keepdim=True)
         # We will compute IoU metric by two ways
         #   1. dataset-wise
         #   2. image-wise
         # but for now we just compute true positive, false positive, false negative and
         # true negative 'pixels' for each image and class
         # these values will be aggregated in the end of an epoch
-        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask.long(), gt.long(), mode="binary")
+        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask.long(), gt.long(), mode="multiclass", num_classes=8)
 
         return {
             "loss": loss,
@@ -125,14 +127,15 @@ if __name__ == '__main__':
     print(args)
     
     train_dataset = smp.datasets.TokaidoDataset(
-        map_dir = r'C:/Users/Reself/Downloads/Tokaido/files_train.csv',
-        root_dir =  r'C:/Users/Reself/Downloads/Tokaido/',
+        map_dir = args.map_dir,
+        root_dir =  args.root_dir,
         augmentation = args.aug,
     )
 
     train_dataloader = DataLoader(dataset=train_dataset, 
-                                  batch_size=args.batch_size, 
-                                  shuffle=True, 
+                                  batch_size=args.batch_size,
+                                  shuffle=True,
+                                  pin_memory=True,
                                   num_workers=0)  # type: ignore os.cpu_count()
     
     model = YasuoModel(arch="FPN", 
@@ -143,7 +146,7 @@ if __name__ == '__main__':
     
     trainer = pl.Trainer(
         gpus=1, 
-        max_epochs=5,
+        max_epochs=args.num_epoch,
     )
 
     trainer.fit(

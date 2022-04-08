@@ -43,12 +43,14 @@ class TokaidoDataset(Dataset):
             pass
         
         # convert to one-hot
-        cmp, dmg = onehot(cmp, 8), onehot(dmg, 3)
+        # cmp, dmg = onehot(cmp, 8), onehot(dmg, 3)
         
         # convert to other format HWC -> CHW
         sample['img'] = np.moveaxis(img, -1, 0)
-        sample['cmp'] = np.moveaxis(cmp, -1, 0)
-        sample['dmg'] = np.moveaxis(dmg, -1, 0)
+        # sample['cmp'] = np.moveaxis(cmp, -1, 0)
+        # sample['dmg'] = np.moveaxis(dmg, -1, 0)
+        sample['cmp'] = np.expand_dims(cmp, 0)
+        sample['dmg'] = np.expand_dims(dmg, 0)
         sample['depth'] = np.expand_dims(depth, 0)
         
         return sample
