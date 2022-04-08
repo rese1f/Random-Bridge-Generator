@@ -1,12 +1,11 @@
 import os
 import torch
-from torch.utils.data import Dataset as BaseDataset
-import torchvision.transforms as transforms
+from torch.utils.data import Dataset
 import numpy as np
-import cv2
+from PIL import Image
 import pandas as pd
 
-class TokaidoDataset(BaseDataset):
+class TokaidoDataset(Dataset):
     def __init__(
             self,
             root_dir, 
@@ -32,50 +31,30 @@ class TokaidoDataset(BaseDataset):
     
     def __getitem__(self, i):
         
-        img_transforms = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize([320,640]),
-            transforms.Normalize([0.485, 0.456, 0.406], 
-                                 [0.229, 0.224, 0.225]),
-            ])
+        sample = {}
+        size = (640, 320)
         
-        img = cv2.imread(self.image_ids[i], flags=-1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = img_transforms(img)
+        img = np.array(Image.open(self.image_ids[i]).convert("RGB").resize(size, 2))
+        cmp = np.array(Image.open(self.cmp_ids[i]).resize(size, 0))
+        dmg = np.array(Image.open(self.dmg_ids[i]).resize(size, 0))
+        depth = np.array(Image.open(self.depth_ids[i]).resize(size, 2))
         
-        cmp = cv2.imread(self.cmp_ids[i], flags=-1)
-        cmp = cv2.resize(src = cmp,
-                         dsize = (640,320), 
-                         interpolation = cv2.INTER_LINEAR)
-        cmp = torch.as_tensor(cmp)
+        if self.augmentation == True:
+            pass
         
-        dmg = cv2.imread(self.dmg_ids[i], flags=-1)
-        dmg = cv2.resize(src = dmg,
-                         dsize = (640,320), 
-                         interpolation = cv2.INTER_LINEAR)
-        dmg = torch.as_tensor(dmg)
+        # convert to one-hot
+        cmp, dmg = onehot(cmp, 8), onehot(dmg, 3)
         
-        depth = cv2.imread(self.depth_ids[i], flags=-1)
-        depth = np.array(depth) / (2**16 - 1) * (30 - 0.5) + 0.5
-        depth = torch.as_tensor(depth)
+        # convert to other format HWC -> CHW
+        sample['img'] = np.moveaxis(img, -1, 0)
+        sample['cmp'] = np.moveaxis(cmp, -1, 0)
+        sample['dmg'] = np.moveaxis(dmg, -1, 0)
+        sample['depth'] = np.expand_dims(depth, 0)
         
-        # apply augmentations
-        if self.augmentation:
-            p = np.random.choice([0, 1])
-            aug_transforms = transforms.Compose([
-                transforms.RandomHorizontalFlip(p)
-            ])
-            img = aug_transforms(img)
-            cmp = aug_transforms(cmp)
-            dmg = aug_transforms(dmg)
-            depth = aug_transforms(depth)
-            
-        # return img, cmp, dmg, depth, self.image_ids[i]
-        return img, cmp
+        return sample
         
     def __len__(self):
         return len(self.ids)
-    
-    @staticmethod
-    def onehot(label, N):
-        pass
+
+def onehot(label, N):
+    return (np.arange(N) == label[...,None]-1).astype(int)

@@ -130,3 +130,5 @@ dmypy.json
 
 # pptx
 .pptx
+examples/
+lightning_logs/
