@@ -9,10 +9,15 @@ from configs import parse_args
 
 class YasuoModel(pl.LightningModule):
     
-    def __init__(self, arch, encoder_name, in_channels, out_classes, lr, **kwargs):
+    def __init__(self, arch, encoder_name, encoder_weights, in_channels, out_classes, lr, **kwargs):
         super().__init__()
         self.model = smp.create_model(
-            arch, encoder_name=encoder_name, in_channels=in_channels, classes=out_classes, **kwargs
+            arch, 
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels, 
+            classes=out_classes, 
+            **kwargs
         )
         # preprocessing parameteres for image
         params = smp.encoders.get_preprocessing_params(encoder_name)
@@ -138,8 +143,9 @@ if __name__ == '__main__':
                                   pin_memory=True,
                                   num_workers=0)  # type: ignore os.cpu_count()
     
-    model = YasuoModel(arch="FPN", 
-                       encoder_name="resnet101",
+    model = YasuoModel(arch=args.arch, 
+                       encoder_name=args.backbone,
+                       encoder_weights=None,
                        in_channels=3,
                        out_classes=8,
                        lr=args.learning_rate)

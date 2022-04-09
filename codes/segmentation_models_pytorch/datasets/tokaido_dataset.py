@@ -35,8 +35,8 @@ class TokaidoDataset(Dataset):
         size = (640, 320)
         
         img = np.array(Image.open(self.image_ids[i]).convert("RGB").resize(size, 2))
-        cmp = np.array(Image.open(self.cmp_ids[i]).resize(size, 0))
-        dmg = np.array(Image.open(self.dmg_ids[i]).resize(size, 0))
+        cmp = np.array(Image.open(self.cmp_ids[i]).resize(size, 0))-1
+        dmg = np.array(Image.open(self.dmg_ids[i]).resize(size, 0))-1
         depth = np.array(Image.open(self.depth_ids[i]).resize(size, 2))
         
         if self.augmentation == True:
