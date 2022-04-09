@@ -22,7 +22,7 @@ def parse_args():
     
     # train
     parser.add_argument('--batch-size', default=8, type=int)
-    parser.add_argument('--learning-rate', default=1e-3, type=float)
+    parser.add_argument('--learning-rate', default=1e-4, type=float)
     parser.add_argument('--num-epoch', default=10, type=int)
     
     args = parser.parse_args()
