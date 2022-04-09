@@ -17,6 +17,7 @@ class YasuoModel(pl.LightningModule):
             encoder_weights=encoder_weights,
             in_channels=in_channels, 
             classes=out_classes, 
+            activation='sigmoid',
             **kwargs
         )
         # preprocessing parameteres for image
@@ -27,7 +28,7 @@ class YasuoModel(pl.LightningModule):
         # for image segmentation dice loss could be the best first choice
         self.loss_fn = smp.losses.DiceLoss(mode=smp.losses.MULTICLASS_MODE, 
                                            from_logits=True,
-                                           ignore_index=0)
+                                           ignore_index=-1)
         self.lr = lr
 
     def forward(self, img):
@@ -70,7 +71,7 @@ class YasuoModel(pl.LightningModule):
         # but for now we just compute true positive, false positive, false negative and
         # true negative 'pixels' for each image and class
         # these values will be aggregated in the end of an epoch
-        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask.long(), gt.long(), mode="multiclass", num_classes=8)
+        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask.long(), gt.long(), mode="multiclass", num_classes=8, ignore_index=-1)
 
         return {
             "loss": loss,
