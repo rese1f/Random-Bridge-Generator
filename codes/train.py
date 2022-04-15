@@ -1,4 +1,5 @@
 import os
+from pickletools import optimize
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
@@ -35,6 +36,7 @@ class YasuoModel(pl.LightningModule):
         # normalize image here
         img = (img - self.mean) / self.std
         output = self.model(img)
+
         return output
 
     def shared_step(self, batch, stage):
@@ -57,10 +59,9 @@ class YasuoModel(pl.LightningModule):
         assert gt.ndim == 4
         
         output = self.forward(img)
-        
         # Predicted mask contains logits, and loss_fn param `from_logits` is set to True
-        loss = self.loss_fn(output, gt)
         
+        loss = self.loss_fn(output, gt)
         # Lets compute metrics for some threshold
         # first convert mask values to probabilities, then 
         # apply thresholding
@@ -112,6 +113,7 @@ class YasuoModel(pl.LightningModule):
         return self.shared_epoch_end(outputs, "train")
 
     def validation_step(self, batch, batch_idx):
+        self.model.eval()
         return self.shared_step(batch, "valid")
 
     def validation_epoch_end(self, outputs):
@@ -133,8 +135,8 @@ if __name__ == '__main__':
     print(args)
     
     train_dataset = smp.datasets.TokaidoDataset(
-        map_dir = args.map_dir,
-        root_dir =  args.root_dir,
+        map_dir = 'files_train.csv',
+        root_dir =  '/mnt/sdb/Tokaido_dataset/',
         augmentation = args.aug,
     )
 
@@ -142,8 +144,12 @@ if __name__ == '__main__':
                                   batch_size=args.batch_size,
                                   shuffle=True,
                                   pin_memory=True,
-                                  num_workers=0)  # type: ignore os.cpu_count()
-    
+                                  num_workers=os.cpu_count())  # type: ignore os.cpu_count()
+    val_dataloader = DataLoader(dataset=train_dataset, 
+                                batch_size=1,
+                                shuffle=False,
+                                pin_memory=True,
+                                num_workers=os.cpu_count())
     model = YasuoModel(arch=args.arch, 
                        encoder_name=args.backbone,
                        encoder_weights=None,
@@ -159,4 +165,5 @@ if __name__ == '__main__':
     trainer.fit(
         model, 
         train_dataloaders=train_dataloader,
+        # val_dataloaders=val_dataloader
     )

@@ -23,10 +23,10 @@ class TokaidoDataset(Dataset):
         # choose only regular images with close-up damage
         self.ids = self.ids[(self.ids[5]==True)&(self.ids[6]==True)] 
         
-        self.image_ids = [os.path.join(root_dir, image_id) for image_id in self.ids.iloc[:, 0]]
-        self.cmp_ids = [os.path.join(root_dir, cmp_id) for cmp_id in self.ids.iloc[:, 1]]
-        self.dmg_ids = [os.path.join(root_dir, dmg_id) for dmg_id in self.ids.iloc[:, 2]]
-        self.depth_ids = [os.path.join(root_dir, depth_id) for depth_id in self.ids.iloc[:, 3]]
+        self.image_ids = [os.path.join(root_dir, image_id.replace("\\","/")) for image_id in self.ids.iloc[:, 0]]
+        self.cmp_ids = [os.path.join(root_dir, cmp_id.replace("\\","/")) for cmp_id in self.ids.iloc[:, 1]]
+        self.dmg_ids = [os.path.join(root_dir, dmg_id.replace("\\","/")) for dmg_id in self.ids.iloc[:, 2]]
+        # self.depth_ids = [os.path.join(root_dir, depth_id.replace("\\","/")) for depth_id in self.ids.iloc[:, 3]]
         self.augmentation = augmentation
     
     def __getitem__(self, i):
@@ -37,7 +37,7 @@ class TokaidoDataset(Dataset):
         img = np.array(Image.open(self.image_ids[i]).convert("RGB").resize(size, 2))
         cmp = np.array(Image.open(self.cmp_ids[i]).resize(size, 0))-1
         dmg = np.array(Image.open(self.dmg_ids[i]).resize(size, 0))-1
-        depth = np.array(Image.open(self.depth_ids[i]).resize(size, 2))
+        # depth = np.array(Image.open(self.depth_ids[i]).resize(size, 2))
         
         if self.augmentation == True:
             pass
@@ -51,7 +51,7 @@ class TokaidoDataset(Dataset):
         # sample['dmg'] = np.moveaxis(dmg, -1, 0)
         sample['cmp'] = np.expand_dims(cmp, 0)
         sample['dmg'] = np.expand_dims(dmg, 0)
-        sample['depth'] = np.expand_dims(depth, 0)
+        # sample['depth'] = np.expand_dims(depth, 0)
         
         return sample
         
