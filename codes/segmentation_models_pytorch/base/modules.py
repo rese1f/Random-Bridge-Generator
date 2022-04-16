@@ -93,7 +93,7 @@ class Activation(nn.Module):
         elif name == "softmax2d":
             self.activation = nn.Softmax(dim=1, **params)
         elif name == "softmax":
-            self.activation = nn.Softmax(**params)
+            self.activation = nn.Softmax(dim=1, **params)
         elif name == "logsoftmax":
             self.activation = nn.LogSoftmax(**params)
         elif name == "tanh":

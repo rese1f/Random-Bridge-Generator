@@ -168,8 +168,7 @@ if __name__ == "__main__":
     # 3. generate dataloader
     loader_args = dict(batch_size=args.batch_size, num_workers=16, pin_memory=True)
     train_dataloader = DataLoader(dataset=train_set, shuffle=True, **loader_args)  # type: ignore os.cpu_count()
-    val_loader = DataLoader(dataset=val_set, shuffle=False, **loader_args)
-    train_dataloader = DataLoader(dataset=dataset, shuffle=True, **loader_args)
+    val_dataloader = DataLoader(dataset=val_set, shuffle=False, **loader_args)
 
     model = YoneModel(
         arch=args.arch,
@@ -182,4 +181,4 @@ if __name__ == "__main__":
 
     trainer = pl.Trainer(gpus=1, max_epochs=args.num_epoch)
 
-    trainer.fit(model, train_dataloaders=train_dataloader, val_dataloaders=val_loader)
+    trainer.fit(model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)
