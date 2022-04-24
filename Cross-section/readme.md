@@ -1,7 +1,7 @@
-#member_util.py
+# member_util.py
 a python function for generating a single structural member with various cross-sections. An example for the rectangular cross-sections is implemented therein.
 
-#Assignments (Please divide work among the group members):
+# Assignments (Please divide work among the group members):
 1. Add functions for generating steel cross-sections (W, HP, L, WT, 2L, HSS, Pipe) to the CrossSections class. See the links attached at the end of this file for the detailed information of cross-sections.
 
 Example of functions:
