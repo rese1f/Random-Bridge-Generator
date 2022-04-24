@@ -21,47 +21,57 @@ class YasuoModel(pl.LightningModule):
             encoder_weights=encoder_weights,
             in_channels=in_channels,
             classes=out_classes,
-            activation="softmax",
+            activation='softmax',
             **kwargs,
         )
         # preprocessing parameteres for image
         # params = smp.encoders.get_preprocessing_params(encoder_name)
         # self.register_buffer("std", torch.tensor(params["std"]).view(1, 3, 1, 1))
         # self.register_buffer("mean", torch.tensor(params["mean"]).view(1, 3, 1, 1))
-
+        self.classes = out_classes
         self.to_one_hot = to_one_hot
         self.lr = lr
         # for image segmentation dice loss could be the best first choice
         # self.loss_fn = smp.losses.DiceLoss(mode=smp.losses.MULTICLASS_MODE, from_logits=True)
-        self.loss_fn = dice_loss() if self.to_one_hot else smp.losses.SoftCrossEntropyLoss(smooth_factor=0.01)
+        # self.loss_fn = dice_loss() if self.to_one_hot else smp.losses.SoftCrossEntropyLoss(smooth_factor=0.01, ignore_index=255)
+        self.loss_fn1 = smp.losses.DiceLoss(mode="multiclass", from_logits=False)
+        self.loss_fn2 = smp.losses.FocalLoss(mode="multiclass", alpha=0.8, gamma=2.0)
+        # self.loss_fn = smp.losses.SoftBCEWithLogitsLoss(smooth_factor=0.01, reduction='mean')
 
     def forward(self, img):
         output = self.model(img)
         return output
 
     def shared_step(self, batch, stage):
-
         img = batch["img"]
         assert img.ndim == 4
 
         h, w = img.shape[2:]
         assert h % 32 == 0 and w % 32 == 0
 
-        gt = batch["cmp"]
+        # gt = batch["cmp"]
+        gt = batch["dmg"]
         if self.to_one_hot:
             assert gt.ndim == 4
         else:
             assert gt.ndim == 3
 
+        # w = torch.tensor([0.01, 1.25, 0.06]) # weight of each label
+        # weight = (gt == 0) * 0.01 + (gt == 1) * 1.25 + (gt == 2) * 0.06
+        
+        
+        # already activated
         output = self.forward(img)
-        loss = self.loss_fn(output, gt.long())
+        import pdb; pdb.set_trace()
+        loss = 0.7 * self.loss_fn1(output, gt) + 0.3 * self.loss_fn2(output, gt)
+        # loss = self.loss_fn1(output, gt)
 
         pred_mask = torch.argmax(output, dim=1)
         if self.to_one_hot:
             gt = torch.argmax(gt, dim=1)
 
         # pred_mask and gt must be (N,H,W)
-        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask, gt, mode="multiclass", num_classes=8)
+        tp, fp, fn, tn = smp.metrics.get_stats(pred_mask, gt, mode="multiclass", num_classes=3)
 
         return {
             "loss": loss,
@@ -78,12 +88,6 @@ class YasuoModel(pl.LightningModule):
         fn = torch.cat([x["fn"] for x in outputs])
         tn = torch.cat([x["tn"] for x in outputs])
 
-        # store the mIou for each class
-        with open("./miou.txt", "ab") as f:
-            per_class_iou = torch.mean(smp.metrics.iou_score(tp, fp, fn, tn, reduction=None), dim=0)
-            per_class_iou = np.array(per_class_iou).reshape(1, 8)
-            np.savetxt(f, per_class_iou, delimiter=" ")
-
         # per image IoU means that we first calculate IoU score for each image
         # and then compute mean over these scores
         per_image_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro-imagewise")
@@ -95,8 +99,18 @@ class YasuoModel(pl.LightningModule):
         # Empty images influence a lot on per_image_iou and much less on dataset_iou.
         dataset_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
 
+        # store the mIou for each class
+        with open("./dmg-" + args.arch + args.backbone + ".txt", "ab") as f:
+            per_class_iou = torch.mean(smp.metrics.iou_score(tp, fp, fn, tn, reduction=None), dim=0).tolist()
+            per_class_iou.append(dataset_iou.item())
+            per_class_iou = np.array(per_class_iou).reshape(1, self.classes + 1)
+            np.savetxt(f, per_class_iou, delimiter=",")
+            
         metrics = {
-            f"{stage}_per_image_iou": per_image_iou,
+            # f"{stage}_per_image_iou": per_image_iou,
+            f"{stage}bgd_iou": per_class_iou[0, 0],
+            f"{stage}small_leak_iou": per_class_iou[0, 1],
+            f"{stage}big_leak_iou": per_class_iou[0, 2],
             f"{stage}_dataset_iou": dataset_iou,
         }
 
@@ -154,9 +168,9 @@ if __name__ == "__main__":
         encoder_name=args.backbone,
         encoder_weights="imagenet",
         in_channels=3,
-        out_classes=8,
+        out_classes=3,
         lr=args.learning_rate,
-        to_one_hot=args.to_one_hot
+        to_one_hot=args.to_one_hot,
     )
 
     # 5. define a trainer

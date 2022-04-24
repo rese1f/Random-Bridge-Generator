@@ -53,16 +53,8 @@ class YoneModel(pl.LightningModule):
     def shared_step(self, batch, stage):
 
         img = batch["img"]
-
-        # Shape of the image should be (batch_size, num_channels, height, width)
-        # if you work with grayscale images, expand channels dim to have [batch_size, 1, height, width]
         assert img.ndim == 4
 
-        # Check that image dimensions are divisible by 32,
-        # encoder and decoder connected by `skip connections` and usually encoder have 5 stages of
-        # downsampling by factor 2 (2 ^ 5 = 32); e.g. if we have image with shape 65x65 we will have
-        # following shapes of features in encoder and decoder: 84, 42, 21, 10, 5 -> 5, 10, 20, 40, 80
-        # and we will get an error trying to concat these features
         h, w = img.shape[2:]
         assert h % 32 == 0 and w % 32 == 0
 
@@ -74,18 +66,8 @@ class YoneModel(pl.LightningModule):
         # Predicted mask contains logits, and loss_fn param `from_logits` is set to True
         loss = self.loss_fn(output, gt)
 
-        # Lets compute metrics for some threshold
-        # first convert mask values to probabilities, then
-        # apply thresholding
-
-        # prob_mask = output.sigmoid()
         pred_mask = (output > self.threshold).type(torch.uint8)
-        # We will compute IoU metric by two ways
-        #   1. dataset-wise
-        #   2. image-wise
-        # but for now we just compute true positive, false positive, false negative and
-        # true negative 'pixels' for each image and class
-        # these values will be aggregated in the end of an epoch
+
         tp, fp, fn, tn = smp.metrics.get_stats(pred_mask.long(), gt.long(), mode="binary")
 
         return {
@@ -102,19 +84,7 @@ class YoneModel(pl.LightningModule):
         fp = torch.cat([x["fp"] for x in outputs])
         fn = torch.cat([x["fn"] for x in outputs])
         tn = torch.cat([x["tn"] for x in outputs])
-
-        # per image IoU means that we first calculate IoU score for each image
-        # and then compute mean over these scores
-
-        # per_image_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro-imagewise")
-
-        # dataset IoU means that we aggregate intersection and union over whole dataset
-        # and then compute IoU score. The difference between dataset_iou and per_image_iou scores
-        # in this particular case will not be much, however for dataset
-        # with "empty" images (images without target class) a large gap could be observed.
-        # Empty images influence a lot on per_image_iou and much less on dataset_iou.
-
-        # dataset_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
+        
         rec = smp.metrics.recall(tp, fp, fn, tn, reduction="micro-imagewise")
         prec = smp.metrics.precision(tp, fp, fn, tn, reduction="micro-imagewise")
         f1 = smp.metrics.f1_score(tp, fp, fn, tn, "micro-imagewise")
@@ -153,6 +123,7 @@ if __name__ == "__main__":
 
     args = parse_args()
     print(args)
+    
     # 1. create dataset
     dataset = Spine_Dataset(
         images_dir="/home/pose3d/projs/UNet_Spine_Proj/UNet_Spine/data/imgs",
@@ -170,6 +141,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(dataset=train_set, shuffle=True, **loader_args)  # type: ignore os.cpu_count()
     val_dataloader = DataLoader(dataset=val_set, shuffle=False, **loader_args)
 
+    # 4. create a model
     model = YoneModel(
         arch=args.arch,
         encoder_name=args.backbone,
@@ -179,6 +151,8 @@ if __name__ == "__main__":
         lr=args.learning_rate,
     )
 
+    # 5. define a trainer
     trainer = pl.Trainer(gpus=1, max_epochs=args.num_epoch)
 
+    # 6. train the network
     trainer.fit(model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)

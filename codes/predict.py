@@ -74,15 +74,15 @@ def load_model(ckpt_path, in_channel, out_classes, args):
 
 def vis_save(batch, pr_masks, save_path, to_one_hot):
     cnt = 0
-    for image, gt_mask, pr_mask in zip(batch["img"], batch["cmp"], pr_masks):
+    for image, gt_mask, pr_mask in zip(batch["img"], batch["dmg"], pr_masks):
         cnt = cnt + 1
 
         if to_one_hot:
             gt_mask = torch.argmax(gt_mask, dim=0) / 7 * 255
         else:
-            gt_mask = gt_mask / 7 * 255
+            gt_mask = gt_mask / 2 * 255
 
-        pr_mask = pr_mask / 7 * 255
+        pr_mask = pr_mask / 2 * 255
 
         plt.figure(figsize=(10, 5))
 
@@ -106,10 +106,10 @@ def vis_save(batch, pr_masks, save_path, to_one_hot):
 
 if __name__ == "__main__":
 
-    ckpt_path = "./lightning_logs/version_36/checkpoints/"
+    ckpt_path = "./lightning_logs/version_94/checkpoints/"
     save_path = "./compare.png"
 
     args = parse_args()
-    batch, pr_masks = load_model(ckpt_path, 3, 8, args)
+    batch, pr_masks = load_model(ckpt_path, 3, 3 , args)
     vis_save(batch, pr_masks, save_path, to_one_hot=args.to_one_hot)
 

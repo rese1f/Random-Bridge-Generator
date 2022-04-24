@@ -83,7 +83,6 @@ class DiceLoss(_Loss):
         if self.mode == MULTICLASS_MODE:
             y_true = y_true.view(bs, -1)
             y_pred = y_pred.view(bs, num_classes, -1)
-
             if self.ignore_index is not None:
                 mask = y_true != self.ignore_index
                 y_pred = y_pred * mask.unsqueeze(1)

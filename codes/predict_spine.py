@@ -12,22 +12,30 @@ from dice_score import dice_loss
 import matplotlib.pyplot as plt
 from train_spine import YoneModel
 
-path = './lightning_logs/version_2/checkpoints/'
+path = "./lightning_logs/version_2/checkpoints/"
 file_name = os.listdir(path)
 file_path = os.path.join(path, file_name[0])
 
 args = parse_args()
 
-# model = YoneModel(
-#     arch=args.arch,
-#     encoder_name=args.backbone,
-#     encoder_weights=None,
-#     in_channels=1,
-#     out_classes=1,
-#     lr=args.learning_rate,
-# )
+model = YoneModel(
+    arch=args.arch,
+    encoder_name=args.backbone,
+    encoder_weights=None,
+    in_channels=1,
+    out_classes=1,
+    lr=args.learning_rate,
+)
 
-model = YoneModel.load_from_checkpoint(file_path, arch=args.arch,encoder_name=args.backbone,encoder_weights=None,in_channels=1,out_classes=1,lr=args.learning_rate,)
+model = YoneModel.load_from_checkpoint(
+    file_path,
+    arch=args.arch,
+    encoder_name=args.backbone,
+    encoder_weights=None,
+    in_channels=1,
+    out_classes=1,
+    lr=args.learning_rate,
+)
 
 # 1. create dataset
 dataset = Spine_Dataset(
@@ -64,13 +72,13 @@ for image, gt_mask, pr_mask in zip(batch["img"], batch["mask"], pr_masks):
     plt.axis("off")
 
     plt.subplot(1, 3, 2)
-    plt.imshow(gt_mask.numpy().squeeze()) # just squeeze classes dim, because we have only one class
+    plt.imshow(gt_mask.numpy().squeeze())  # just squeeze classes dim, because we have only one class
     plt.title("Ground truth")
     plt.axis("off")
 
     plt.subplot(1, 3, 3)
-    plt.imshow(pr_mask.numpy().squeeze()) # just squeeze classes dim, because we have only one class
+    plt.imshow(pr_mask.numpy().squeeze())  # just squeeze classes dim, because we have only one class
     plt.title("Prediction")
     plt.axis("off")
-    plt.savefig('./predicted_results/compare{}.png'.format(cnt))
+    plt.savefig("./predicted_results/compare{}.png".format(cnt))
     plt.show()
