@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ nm# -*- coding: utf-8 -*-
 """
 Created on Sun Apr 17 09:14:17 2022
 
@@ -306,8 +306,8 @@ class Member:
             npts: Vertices number of one cross-section
             t: Translation of the cross-sections
             r: Rotation instance
-            v: list of three-tuples represented the coordinates in 3D
-            f: list of
+            v: list of three-tuples (vertices) represented the coordinates in 3D
+            f: list of faces
         """
         self.n = C.shape[0]
         self.npts = C.shape[1]
@@ -354,7 +354,7 @@ class Member:
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        plt.show()
+        plt.show(    )
 
 
 if __name__ == "__main__":
