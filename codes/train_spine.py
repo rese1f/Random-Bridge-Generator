@@ -8,7 +8,7 @@ from segmentation_models_pytorch.datasets.spine_dataset import Spine_Dataset
 
 from torch.utils.data import DataLoader, random_split
 from configs import parse_args
-from dice_score import dice_loss
+from custom_loss.dice_score import dice_loss
 import matplotlib.pyplot as plt
 
 
@@ -145,14 +145,14 @@ if __name__ == "__main__":
     model = YoneModel(
         arch=args.arch,
         encoder_name=args.backbone,
-        encoder_weights=None,
+        encoder_weights="imagenet",
         in_channels=1,
         out_classes=1,
         lr=args.learning_rate,
     )
 
     # 5. define a trainer
-    trainer = pl.Trainer(gpus=1, max_epochs=args.num_epoch)
+    trainer = pl.Trainer(gpus=[1], max_epochs=args.num_epoch)
 
     # 6. train the network
     trainer.fit(model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader)

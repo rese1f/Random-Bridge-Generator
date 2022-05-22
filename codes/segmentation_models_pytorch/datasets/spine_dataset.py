@@ -59,8 +59,8 @@ class Spine_Dataset(Dataset):
 
     def __getitem__(self, idx):
         name = self.ids[idx]
-        mask_file = list(self.masks_dir.glob(name + ".*"))  # reg exp match
-        img_file = list(self.images_dir.glob(name + ".*"))
+        mask_file = list(self.masks_dir.glob(f"{name}.*"))
+        img_file = list(self.images_dir.glob(f"{name}.*"))
 
 
         mask = self.load(mask_file[0])
@@ -74,8 +74,4 @@ class Spine_Dataset(Dataset):
         if self.augmentation:
             img, mask = self.transform(img, mask)
 
-        sample = {}
-        sample["img"] = img
-        sample["mask"] = mask
-
-        return sample
+        return {"img": img, "mask": mask}

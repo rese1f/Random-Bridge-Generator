@@ -25,18 +25,16 @@ def parse_args():
     parser.add_argument("--to-one-hot", default=False, type=bool, help="if change gt to one-hot")
 
     # model
-    parser.add_argument("--arch", default="fpn", type=str)
-    parser.add_argument("--backbone", default="se_resnet50", type=str)
+    parser.add_argument("--arch", default="manet", type=str)
+    parser.add_argument("--backbone", default="resnext50_32x4d", type=str)
 
     # train
-    parser.add_argument("--batch-size", default=16, type=int)
+    parser.add_argument("--batch-size", default=8, type=int)
     parser.add_argument("--learning-rate", default=1e-5, type=float)
-    parser.add_argument("--num-epoch", default=50, type=int)
+    parser.add_argument("--num-epoch", default=100, type=int)
     parser.add_argument("--val-percent",default=0.1,type=float)
-
-    args = parser.parse_args()
 
     # if configs conflict:
     #   raise Keyerror()
 
-    return args
+    return parser.parse_args()

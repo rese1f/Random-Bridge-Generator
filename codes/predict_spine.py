@@ -8,11 +8,11 @@ from segmentation_models_pytorch.datasets.spine_dataset import Spine_Dataset
 
 from torch.utils.data import DataLoader, random_split
 from configs import parse_args
-from dice_score import dice_loss
+from custom_loss.dice_score import dice_loss
 import matplotlib.pyplot as plt
 from train_spine import YoneModel
 
-path = "./lightning_logs/version_2/checkpoints/"
+path = "./lightning_logs/version_189/checkpoints/"
 file_name = os.listdir(path)
 file_path = os.path.join(path, file_name[0])
 
@@ -80,5 +80,5 @@ for image, gt_mask, pr_mask in zip(batch["img"], batch["mask"], pr_masks):
     plt.imshow(pr_mask.numpy().squeeze())  # just squeeze classes dim, because we have only one class
     plt.title("Prediction")
     plt.axis("off")
-    plt.savefig("./predicted_results/compare{}.png".format(cnt))
+    plt.savefig(f"./predicted_results/compare{cnt}.png")
     plt.show()
