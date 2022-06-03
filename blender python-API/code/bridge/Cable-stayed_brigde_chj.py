@@ -18,6 +18,11 @@ bpy.ops.object.delete()
 
 # Span_of_Cable = 10
 
+'''
+The track of Bridge, three dimensions
+
+'''
+
 def fx(x):
     return x
 
@@ -26,14 +31,13 @@ def fy(x):
 
 def fz(x):
     return 10
-'''
-The track of Bridge, three dimensions
-'''
+
 
 
 def fyd(x):
     '''
-    derivative of fy; Useless in this file
+    derivative of fy
+
     '''
     k = Symbol("k")
     fyd = diff(fy(k),k,1)
@@ -52,6 +56,7 @@ class CrossSection:
         b - width
         h - height on the top of deck or the height of the columns
         h2 - thickness of the deck
+        
         '''
         yz = np.array([
             [-0.5*b,h-h2],
@@ -95,6 +100,7 @@ class CrossSection:
     def circle_cable(self,radius_circle):
         '''
         radius_circle - generate a circle
+
         '''
         alpha = np.linspace(0, 2*np.pi, 50)
         x = np.array(np.cos(alpha))*radius_circle
@@ -108,6 +114,14 @@ class CrossSection:
         return yz
     
     def circle_cable_ForCableBridge(self, coord, radius = 0.05):
+        """
+        goal - generate circle for cable bridge. Special because it directly tranerate xyz coordinate,
+               therefore no need for AddCurrent Section()
+        
+        input: coord - coordinate of center
+               radius - radius of circle
+
+        """
         alpha = np.linspace(0, 2*np.pi, 5)
         x = float(coord[0]) 
         y = float(coord[1]) + np.array(np.cos(alpha))*radius
@@ -116,9 +130,7 @@ class CrossSection:
         xyz[:, 0] = x + y*0
         xyz[:, 1] = y
         xyz[:, 2] = z
-        #print(xyz)
-        # self.yz = np.delete(xyz,-1,axis=0).round(2) ## delete last coordinate
-        #self.AddCurrentSection()
+
         return xyz
 
 
@@ -155,6 +167,12 @@ class CrossSection:
 
 
     def AddCurrentSection(self):
+        """
+        input: the coordinate of one cross-section (yz)
+
+        output: the duplication of several cross-sections (C), currently all the same
+
+        """
         yz = self.yz.reshape((1,self.yz.shape[0],self.yz.shape[1]))
         if self.C is None:
             self.C = yz
@@ -162,13 +180,14 @@ class CrossSection:
             self.C = np.concatenate((self.C,yz),0)
 
         
-    def Show(self):
-        idx = np.mod(np.arange(self.yz.shape[0]+1),self.yz.shape[0])
-        plt.figure()
-        plt.plot(self.yz[idx,0],self.yz[idx,1])
-        plt.xlabel('y'); plt.ylabel('z')
-        plt.axis('equal')
-        plt.title("Cross-section {:d}, {:d} points".format(self.C.shape[0],self.C.shape[1]))
+    # def Show(self):
+    #     idx = np.mod(np.arange(self.yz.shape[0]+1),self.yz.shape[0])
+    #     plt.figure()
+    #     plt.plot(self.yz[idx,0],self.yz[idx,1])
+    #     plt.xlabel('y'); plt.ylabel('z')
+    #     plt.axis('equal')
+    #     plt.title("Cross-section {:d}, {:d} points".format(self.C.shape[0],self.C.shape[1]))
+
 
 class Member:
     def __init__(self,C,t=None,quat=None):
@@ -212,31 +231,35 @@ class Member:
                 idx2 = np.arange(m+self.npts,m+2*self.npts)
                 self.f = self.f + [(idx1[k],idx1[np.mod(k+1,self.npts)],idx2[np.mod(k+1,self.npts)],idx2[k]) for k in range(self.npts)]
         
-    def Show(self):
-        v = np.array(self.v)
-        plt.figure()
-        ax = plt.axes(projection='3d')
-        for f in self.f:
-            idxv = np.array(f)
-            ax.plot3D(v[idxv,0], v[idxv,1], v[idxv,2], 'k')
+    # def Show(self):
+    #     v = np.array(self.v)
+    #     plt.figure()
+    #     ax = plt.axes(projection='3d')
+    #     for f in self.f:
+    #         idxv = np.array(f)
+    #         ax.plot3D(v[idxv,0], v[idxv,1], v[idxv,2], 'k')
             
-        vmin = v.min(0); vmax = v.max(0); ctr = (vmin+vmax)/2.
-        half = (vmax-vmin).max()/2.
-        ax.set_xlim((ctr[0]-half,ctr[0]+half))
-        ax.set_ylim((ctr[1]-half,ctr[1]+half))
-        ax.set_zlim((ctr[2]-half,ctr[2]+half))
-        ax.set_xlabel('X')
-        ax.set_ylabel('Y')
-        ax.set_zlabel('Z')
+    #     vmin = v.min(0); vmax = v.max(0); ctr = (vmin+vmax)/2.
+    #     half = (vmax-vmin).max()/2.
+    #     ax.set_xlim((ctr[0]-half,ctr[0]+half))
+    #     ax.set_ylim((ctr[1]-half,ctr[1]+half))
+    #     ax.set_zlim((ctr[2]-half,ctr[2]+half))
+    #     ax.set_xlabel('X')
+    #     ax.set_ylabel('Y')
+    #     ax.set_zlabel('Z')
 
 
 class cable_stayed_bridge_build:
     def __init__(self):
-        self.Width_of_Bridge = 10 # Width of the deck                   
-        self.Length_of_Bridge = 500 # Length[meter]   
-        self.Thickness_of_Deck = 1                     
-        self.Thickness_of_Column = 5      
-        self.Span_of_Column = 100
+        """
+        unit - [meter]
+
+        """
+        self.Width_of_Bridge = 10 # width of the deck                   
+        self.Length_of_Bridge = 500 # length of bridge    
+        self.Thickness_of_Deck = 1  # thickness of deck (in z direction)               
+        self.Thickness_of_Column = 5 # thickness of column (in x direction)
+        self.Span_of_Column = 100 # span length between column (in x direction)
 
         self.height = np.array([fz(i) for i in range(self.Length_of_Bridge)])
         theta = np.array([np.arctan(float(fyd(i))) for i in range(1,self.Length_of_Bridge)])
@@ -245,23 +268,34 @@ class cable_stayed_bridge_build:
 
     def duplicateDistance(self):
         '''
+        goal: set the position for column
+        
         Args:
             w - Span between two columns
             l - Length of the Bridge
             n - number of column
         Return:
-            Coordinates for each column on x - axis
+            D - Coordinates for each column on x - axis
         '''
         w = self.Span_of_Column
         l = self.Length_of_Bridge
         self.n = int(l/w) ## round to smaller intiger
         D = np.zeros(self.n)
         for i in range(self.n):
-            D[i] = w/2 + w*i
+            D[i] = w/2 + w*i 
         return D
 
 
     def column(self, w_2, h_1, h_2, h_3, h_4, h_5, k):
+        """
+        goal: seperate the the shape of column into two parts to construct hollow structure
+
+        args: self.h_deck_bottom - z coordinate of bottom of deck
+              self.h_cable_bottom - z coordinate of lowest possible position for cable installation
+              self.bridge_max_width - the largest possible width for deck
+              self.h_cable - largerst possible height for cable installation
+
+        """
         
         self.h_deck_bottom = h_1 + h_2
         self.h_cable_bottom = h_1 + h_2 + h_3 + h_4
@@ -275,7 +309,8 @@ class cable_stayed_bridge_build:
         edges = [ ]
         faces = m.f
 
-        npt_half = int(m.npts/2)
+        # cover the face of two half-part
+        npt_half = int(m.npts/2) 
         f1 = ()
         f2 = ()
         for i in range(npt_half):
@@ -300,7 +335,7 @@ class cable_stayed_bridge_build:
 
             #create an object from the mesh
             column=bpy.data.objects.new("column" + str(i+1),new_mesh)
-            column.location.x = self.D[i]
+            column.location.x = self.D[i] ## blender command, set x coordinate
 
             #add the object to view
             view_layer=bpy.context.view_layer
@@ -308,6 +343,9 @@ class cable_stayed_bridge_build:
 
 
     def deck(self):
+        """
+        goal: create the shape of deck
+        """
         cs = CrossSection()
         h = self.h_deck_bottom + self.Thickness_of_Deck
         for i in range(self.Length_of_Bridge):
@@ -346,10 +384,15 @@ class cable_stayed_bridge_build:
     
     def cable(self, num_cable):
         """
+        goal: set the list of center of circle, and then connect them
+
         input: num_cable - total number of cable for one side of column
 
+        args: cable_bottom - all the coordinate of center for cable circle on deck
+              cable_top - all the coordinate of center for cable circle on column
+
         """
-        # bottom axis of cable
+        # bottom coordinate of cable
         z_cable_bottom = self.h_deck_bottom + self.Thickness_of_Deck/2
         
         y_cable_bottom = self.bridge_max_width/2 * (9/10)
@@ -364,31 +407,33 @@ class cable_stayed_bridge_build:
         x_cable_bottom = x_cable_bottom.reshape([-1, 1])
 
         cable_bottom_right = np.hstack((x_cable_bottom, x_cable_bottom*0+y_cable_bottom, x_cable_bottom*0+z_cable_bottom))
-        cable_bottom_left = cable_bottom_right * np.array([[1,-1,1]])
+        cable_bottom_left = cable_bottom_right * np.array([[1,-1,1]]) ## to flip side, only y coordinate change to negative
         cable_bottom = np.concatenate([cable_bottom_left, cable_bottom_right], 0) ## all the coordinate for cable bottom
 
-        # top axis of cable
+        # top coordinate of cable
         y_cable_top = 0
 
         x_cable_top = np.ones([self.n, num_cable*2]) * D.reshape([self.n, 1]) # *2: front and back
         x_cable_top = x_cable_top.reshape([-1, 1])
-        for i in range(self.n):
+        for i in range(self.n): ## adjust the top part of cable just in touch with the surface of column
             index_even = i*2
             index_odd = i*2 + 1
             x_cable_top[(index_odd*num_cable) : ((index_odd+1)*num_cable)] += (self.Thickness_of_Column - 1)
         
 
-        z_dist = self.h_cable/(num_cable+1)/2
+        z_dist = self.h_cable/(num_cable+1)*3/4 ## distance between two cables in z direction
         z_cable_top = np.zeros([self.n, num_cable*2]) 
-        loc = np.hstack((np.linspace(num_cable, 1, num_cable), np.linspace(1, num_cable, num_cable)))
+        loc = np.hstack((np.linspace(num_cable, 1, num_cable), np.linspace(1, num_cable, num_cable))) ## help to locate z coordinate
         for i in range(self.n):
-            z_cable_top[i, :] = self.h_cable_bottom + self.h_cable/2 + z_dist * loc
+            z_cable_top[i, :] = self.h_cable_bottom + self.h_cable/4 + z_dist * loc
         z_cable_top = z_cable_top.reshape([-1, 1])
 
         cable_top_right = np.hstack((x_cable_top, z_cable_top*0 + y_cable_top, z_cable_top))
         cable_top_left = cable_top_right * np.array([[1,-1,1]])
         cable_top = np.concatenate([cable_top_left, cable_top_right], 0) ## all the coordinate for cable top
 
+
+        # connect two circle surface of cable manually
         for i in range(self.n * num_cable * 4):
             self.v = []
             self.f = []
