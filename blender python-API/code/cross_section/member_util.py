@@ -29,6 +29,39 @@ class CrossSection:
         self.C = None
         self.yz = None
 
+    def A_shape_column(self, w_2, h_1, h_2, h_3, h_4, h_5, k, bridge_thick):
+        """
+        见示意图
+
+        """
+        w_1 = (h_1+h_2+h_3)/k
+        yz1 = np.array([
+            [0, (h_1+h_2+h_3+h_4+h_5)],
+            [0, (h_1+h_2+h_3)],
+            [h_3/k, (h_1+h_2)],
+            [0, (h_1+h_2)],
+            [0, h_1],
+            [(h_2+h_3)/k, h_1],            
+            [w_1, 0],
+            [w_1+w_2, 0],
+            [(w_1+w_2)-(h_1+h_2+h_3+h_4)/k, (h_1+h_2+h_3+h_4)],
+            [(w_1+w_2)-(h_1+h_2+h_3+h_4)/k, (h_1+h_2+h_3+h_4+h_5)]
+        ])
+
+        yz2 = np.zeros(yz1.shape)
+        yz2[:, 0] = -yz1[:, 0]
+        yz2[:, 1] = yz1[:, 1]
+        yz = np.concatenate((yz1,yz2), 0)
+        bridge_max_width = (h_3-bridge_thick)/k * 2
+        self.yz = yz
+        self.add_current_section()
+        return yz, bridge_max_width, h_5 
+
+
+
+
+
+
     def rectangle(self, b, h):
         """
         Create a rectangle cross-section.
@@ -359,11 +392,11 @@ class Member:
 
 if __name__ == "__main__":
     cs = CrossSection()
-    n = 10
+    n = 5
     # create constant rectangular cross section
     for i in range(n):
         # cs.wt_beam(1.0, 1.0, 0.1, 0.1)
-        cs.double_l_beam(1, 1, 0.1, 0.1, 0.05)
+        cs.A_shape_column(1,5,2,15,2,8,4,2)
         # cs.hss_beam(1, 1, 0.2)
         # cs.pipe(3, 1)
     # cs.show()
@@ -374,10 +407,11 @@ if __name__ == "__main__":
     t[:, 0] = np.arange(n)
     a = 1.5
     omega = np.pi / (n - 1)
-    t[:, 2] = np.sin(omega * np.arange(n)) * a
+    #t[:, 2] = np.sin(omega * np.arange(n)) * a
     rotvec = np.zeros((n, 3))
     rotvec[:, 1] = -np.arctan(omega * a * np.cos(omega * np.arange(n)))
     Rot = R.from_rotvec(rotvec)
 
-    m = Member(cs.C, t, Rot.as_quat())
+    #m = Member(cs.C, t, Rot.as_quat())
+    m = Member(cs.C, t, None)
     m.show()
