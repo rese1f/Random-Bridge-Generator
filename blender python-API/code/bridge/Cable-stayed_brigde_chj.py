@@ -133,9 +133,6 @@ class CrossSection:
 
         return xyz
 
-
-    
-
     def A_shape_column(self, w_2, h_1, h_2, h_3, h_4, h_5, k, bridge_thick):
         """
         见示意图
@@ -248,7 +245,6 @@ class Member:
     #     ax.set_ylabel('Y')
     #     ax.set_zlabel('Z')
 
-
 class cable_stayed_bridge_build:
     def __init__(self):
         """
@@ -264,7 +260,7 @@ class cable_stayed_bridge_build:
         self.height = np.array([fz(i) for i in range(self.Length_of_Bridge)])
         theta = np.array([np.arctan(float(fyd(i))) for i in range(1,self.Length_of_Bridge)])
         self.theta = np.concatenate((np.array([0]),theta),axis=0) ## only have one dimension: ndarray[0, theta1, theta2, ...] 
-    
+
 
     def duplicateDistance(self):
         '''
@@ -359,7 +355,7 @@ class cable_stayed_bridge_build:
         Rot = R.from_rotvec(rotvec)
         m = Member(cs.C,t,Rot.as_quat())
         vertices = m.v
-        edges = [ ]
+        edges = []
         faces = m.f
         
         f1 = ()
@@ -454,7 +450,7 @@ class cable_stayed_bridge_build:
                 self.f = self.f + [(j, np.mod(j+1,self.npts),np.mod(j+1,self.npts) + self.npts, j + self.npts) for k in range(self.npts)]
 
             vertices = self.v
-            edges = [ ]
+            edges = []
             faces = self.f
 
             print(vertices)
@@ -470,9 +466,7 @@ class cable_stayed_bridge_build:
             #add the object to view
             view_layer=bpy.context.view_layer
             view_layer.active_layer_collection.collection.objects.link(cable)
-       
 
-        
 
 bridge = cable_stayed_bridge_build()
 bridge.column(1,5,2,15,2,8,4)

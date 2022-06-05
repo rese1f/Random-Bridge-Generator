@@ -57,38 +57,33 @@ class CrossSection:
         self.add_current_section()
         return yz, bridge_max_width, h_5 
 
-
-
-
-
-
-    def rectangle(self, b, h):
-        """
-        Create a rectangle cross-section.
-        Args:
-            b: Flange length
-            h: Web length
-
-        Returns:
-            yz: rectangle cross-section's vertices coordinates
-        """
-        # Initialize an empty array for four vertices
-        # Possible absolute value(s) for y
-        # Possible absolute value(s) for z
-        yz = np.zeros((4, 2))
-        y0 = 0.5 * b
-        z0 = 0.5 * h
-
-        # The rows in yz are the coordinates (y,z).
-        # Begin from the left-bottom corner and add other points counterclockwise
-        yz[:, 0] = np.array([-y0, y0, y0, -y0])
-        yz[:, 1] = np.array([-z0, -z0, z0, z0])
-
-        # Update self.yz
-        # Update self.C
-        self.yz = yz
-        self.add_current_section()
-        return yz
+    # def rectangle(self, b, h):
+    #     """
+    #     Create a rectangle cross-section.
+    #     Args:
+    #         b: Flange length
+    #         h: Web length
+    #
+    #     Returns:
+    #         yz: rectangle cross-section's vertices coordinates
+    #     """
+    #     # Initialize an empty array for four vertices
+    #     # Possible absolute value(s) for y
+    #     # Possible absolute value(s) for z
+    #     yz = np.zeros((4, 2))
+    #     y0 = 0.5 * b
+    #     z0 = 0.5 * h
+    #
+    #     # The rows in yz are the coordinates (y,z).
+    #     # Begin from the left-bottom corner and add other points counterclockwise
+    #     yz[:, 0] = np.array([-y0, y0, y0, -y0])
+    #     yz[:, 1] = np.array([-z0, -z0, z0, z0])
+    #
+    #     # Update self.yz
+    #     # Update self.C
+    #     self.yz = yz
+    #     self.add_current_section()
+    #     return yz
 
     def w_beam(self, b, h, tf, tw):
         """
@@ -324,6 +319,72 @@ class CrossSection:
         plt.show()
 
 
+class AShapeColumn(CrossSection):
+
+    def setShape(self, w_2, h_1, h_2, h_3, h_4, h_5, k, bridge_thick):
+        """
+        见示意图
+
+        """
+        w_1 = (h_1+h_2+h_3)/k
+        yz1 = np.array([
+            [0, (h_1+h_2+h_3+h_4+h_5)],
+            [0, (h_1+h_2+h_3)],
+            [h_3/k, (h_1+h_2)],
+            [0, (h_1+h_2)],
+            [0, h_1],
+            [(h_2+h_3)/k, h_1],
+            [w_1, 0],
+            [w_1+w_2, 0],
+            [(w_1+w_2)-(h_1+h_2+h_3+h_4)/k, (h_1+h_2+h_3+h_4)],
+            [(w_1+w_2)-(h_1+h_2+h_3+h_4)/k, (h_1+h_2+h_3+h_4+h_5)]
+        ])
+
+        yz2 = np.zeros(yz1.shape)
+        yz2[:, 0] = -yz1[:, 0]
+        yz2[:, 1] = yz1[:, 1]
+        yz = np.concatenate((yz1,yz2), 0)
+        bridge_max_width = (h_3-bridge_thick)/k * 2
+        self.yz = yz
+        self.add_current_section()
+
+        return yz, bridge_max_width, h_5
+
+
+class Rectangle(CrossSection):
+    def setShape(self, b, h, h2):
+        """
+        b - width
+        h - height on the top of deck or the height of the columns
+        h2 - thickness of the deck
+        """
+        yz = np.array([
+            [-0.5*b,h-h2],
+            [0.5*b,h-h2],
+            [0.5*b,h],
+            [-0.5*b,h]
+        ])
+        self.yz = yz
+        self.add_current_section()
+        return yz
+
+
+class Circle(CrossSection):
+    def setShape(self, radius_circle):
+        """
+        radius_circle - generate a circle
+        """
+        alpha = np.linspace(0, 2 * np.pi, 50)
+        x = np.array(np.cos(alpha)) * radius_circle
+        y = np.array(np.sin(alpha)) * radius_circle
+        yz = np.zeros((len(x), 2))
+        yz[:, 0] = x
+        yz[:, 1] = y
+        yz = np.delete(yz, -1, axis=0).round(2)
+        self.yz = yz
+        self.add_current_section()
+        return yz
+
 
 class Member:
     def __init__(self, C, t=None, quat=None):
@@ -387,7 +448,7 @@ class Member:
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        plt.show(    )
+        plt.show()
 
 
 if __name__ == "__main__":
