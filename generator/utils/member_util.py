@@ -28,6 +28,50 @@ class CrossSection:
         """
         self.C = None
         self.yz = None
+        
+    def add_current_section(self):
+        """
+        Update self.C by adding the current section
+        """
+        # Reshape yz from 2D to 3D.
+        yz = self.yz.reshape((1, self.yz.shape[0], self.yz.shape[1]))
+        if self.C is None:
+            self.C = yz
+        else:
+            # Add the current section to C along axis = 0.
+            self.C = np.concatenate((self.C, yz), 0)
+
+    def show(self, double=False):
+        """
+        Plot the current cross-section of given class
+        Args:
+            double: Boolean
+                when double == True, there are two graphics in a figure
+
+        Returns:
+            The cross-section view of the class
+        """
+        # m is the number of vertices
+        m = self.yz.shape[0]
+        half_m = int(m/2)
+        plt.figure()
+
+        # idx is a 1D numpy array represents the index of points with shape (n,) with value [0, ..., n-1, 0]
+        # n is the number of vertices in an individual graphic
+        # The figure connect the vertices sequentially, and connect the last point to the first
+        if double:
+            idx = np.mod(np.arange(half_m + 1), half_m)
+            plt.plot(self.yz[idx, 0], self.yz[idx, 1])
+            plt.plot(self.yz[idx+half_m, 0], self.yz[idx+half_m, 1], color='#1f77b4')
+        else:
+            idx = np.mod(np.arange(m + 1), m)
+            plt.plot(self.yz[idx, 0], self.yz[idx, 1])
+
+        plt.xlabel('y')
+        plt.ylabel('z')
+        plt.axis('equal')
+        plt.title("Cross-section {:d}, {:d} points".format(self.C.shape[0], self.C.shape[1]))
+        plt.show()
 
     def A_shape_column(self, w_2, h_1, h_2, h_3, h_4, h_5, k, bridge_thick):
         """
@@ -56,34 +100,6 @@ class CrossSection:
         self.yz = yz
         self.add_current_section()
         return yz, bridge_max_width, h_5 
-
-    # def rectangle(self, b, h):
-    #     """
-    #     Create a rectangle cross-section.
-    #     Args:
-    #         b: Flange length
-    #         h: Web length
-    #
-    #     Returns:
-    #         yz: rectangle cross-section's vertices coordinates
-    #     """
-    #     # Initialize an empty array for four vertices
-    #     # Possible absolute value(s) for y
-    #     # Possible absolute value(s) for z
-    #     yz = np.zeros((4, 2))
-    #     y0 = 0.5 * b
-    #     z0 = 0.5 * h
-    #
-    #     # The rows in yz are the coordinates (y,z).
-    #     # Begin from the left-bottom corner and add other points counterclockwise
-    #     yz[:, 0] = np.array([-y0, y0, y0, -y0])
-    #     yz[:, 1] = np.array([-z0, -z0, z0, z0])
-    #
-    #     # Update self.yz
-    #     # Update self.C
-    #     self.yz = yz
-    #     self.add_current_section()
-    #     return yz
 
     def w_beam(self, b, h, tf, tw):
         """
@@ -274,52 +290,11 @@ class CrossSection:
         self.add_current_section()
         return yz
 
-    def add_current_section(self):
-        """
-        Update self.C by adding the current section
-        """
-        # Reshape yz from 2D to 3D.
-        yz = self.yz.reshape((1, self.yz.shape[0], self.yz.shape[1]))
-        if self.C is None:
-            self.C = yz
-        else:
-            # Add the current section to C along axis = 0.
-            self.C = np.concatenate((self.C, yz), 0)
-
-    def show(self, double=False):
-        """
-        Plot the current cross-section of given class
-        Args:
-            double: Boolean
-                when double == True, there are two graphics in a figure
-
-        Returns:
-            The cross-section view of the class
-        """
-        # m is the number of vertices
-        m = self.yz.shape[0]
-        half_m = int(m/2)
-        plt.figure()
-
-        # idx is a 1D numpy array represents the index of points with shape (n,) with value [0, ..., n-1, 0]
-        # n is the number of vertices in an individual graphic
-        # The figure connect the vertices sequentially, and connect the last point to the first
-        if double:
-            idx = np.mod(np.arange(half_m + 1), half_m)
-            plt.plot(self.yz[idx, 0], self.yz[idx, 1])
-            plt.plot(self.yz[idx+half_m, 0], self.yz[idx+half_m, 1], color='#1f77b4')
-        else:
-            idx = np.mod(np.arange(m + 1), m)
-            plt.plot(self.yz[idx, 0], self.yz[idx, 1])
-
-        plt.xlabel('y')
-        plt.ylabel('z')
-        plt.axis('equal')
-        plt.title("Cross-section {:d}, {:d} points".format(self.C.shape[0], self.C.shape[1]))
-        plt.show()
 
 
 class AShapeColumn(CrossSection):
+    def __init__(self):
+        super().__init__()
 
     def setShape(self, w_2, h_1, h_2, h_3, h_4, h_5, k, bridge_thick):
         """
@@ -352,6 +327,9 @@ class AShapeColumn(CrossSection):
 
 
 class Rectangle(CrossSection):
+    def __init__(self):
+        super().__init__()
+        
     def setShape(self, b, h, h2):
         """
         b - width
@@ -370,6 +348,9 @@ class Rectangle(CrossSection):
 
 
 class Circle(CrossSection):
+    def __init__(self):
+        super().__init__()
+        
     def setShape(self, radius_circle):
         """
         radius_circle - generate a circle
