@@ -1,1 +1,0 @@
-from .w_beam import wBeam

@@ -5,11 +5,11 @@
 ### Get start
 
 ```python
-    from BridgeGenerator import CrossSection
+    from BridgeGenerator import Member
 
     if __name__ == '__main__':
-        cfg = './BridgeGenerator/CrossSection/configs/w_beam.yaml'
-        w_beam = CrossSection.wBeam(cfg)
+        cfg = './BridgeGenerator/Member/configs/w_beam.yaml'
+        w_beam = Member.wBeam(cfg)
 ```
 
 ### Add your own cross-section
@@ -17,9 +17,9 @@
 1. Create a .py file and define a class in `./BridgeGenerator/CrossSection/`
 
 ```python
-    from .base import CrossSection
+    from .base import Member
 
-    class ClassName(CrossSection):
+    class ClassName(Member):
         def __init__(self, cfg):
             super().__init__(cfg)
             self.shape_parameter = ...

@@ -1,9 +1,9 @@
 import numpy as np
 
-from .base import CrossSection
+from .base import Member
 
 
-class wBeam(CrossSection):
+class WBeam(Member):
     def __init__(self, cfg):
         """
         Create a W-beam-shape cross-section

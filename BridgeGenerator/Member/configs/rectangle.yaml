@@ -1,0 +1,4 @@
+name: rectangle
+shape:
+  Flange length: 1 # b
+  Web length: 3 # h
