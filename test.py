@@ -1,11 +1,8 @@
 import numpy as np
+import bpy
 
+mb = bpy.data.texts["base.py"].as_module()
 if __name__ == '__main__':
     cfg = {"name": "rectangle", "shape": {"Flange length": 1, "Web length": 3}}
-    # Rc = mb.Rectangle(cfg)
-    # print(Rc.yz)
-a = {'name': 1, "type": {'square': 1}}
-print(a["name"])
-a = np.array([1, 2, 3])
-print(np.concatenate([a for i in range(3)], axis = 0))
-print(np.hstack([a, a]))
+    RC = mb.Rectangle(cfg, 2)
+    RC.createBlenderObj("chenggong")

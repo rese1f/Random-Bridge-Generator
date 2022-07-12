@@ -103,7 +103,7 @@ class Member:
         plt.title("Cross-section of {}, {:d} points".format(self.type, self.yz.shape[0]))
         plt.show()
 
-    def createBlenderObj(self, name, obj_num=1):
+    def createObj(self, name, obj_num=1):
         vertices = self.v
         edges = []
         faces = self.f
