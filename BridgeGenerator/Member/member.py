@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy.spatial.transform import Rotation as R
+import random
 
 
 class Member:
@@ -44,6 +45,8 @@ class Member:
         self.r = None
         self.npts = 0
 
+        self.obj = None
+
         print("create {}\nshape {}".format(self.name, self.shape))
 
     def setMember(self):
@@ -75,6 +78,9 @@ class Member:
                 idx2 = np.arange(m + self.npts, m + 2 * self.npts)
                 self.f = self.f + [(idx1[k], idx1[np.mod(k + 1, self.npts)], idx2[np.mod(k + 1, self.npts)], idx2[k])
                                    for k in range(self.npts)]
+
+    def setMember3d(self):
+        return None
 
     def showCrossSection(self):
         """
@@ -122,6 +128,8 @@ class Member:
         view_layer = bpy.context.view_layer
         view_layer.active_layer_collection.collection.objects.link(obj)
 
+        self.obj = obj
+
 
 class Rectangle(Member):
     def __init__(self, cfg, n=1, t=None, quat=None):
@@ -158,3 +166,25 @@ class Rectangle(Member):
             yz: cross-section's vertices coordinates
         """
         return self.yz
+
+
+class ConcreteSolid(Member):
+    def __init__(self, cfg, n, t=None, quat=None):
+        super().__init__(cfg, n, t, quat)
+        self.w_deck = self.shape['w_deck']
+        self.t_deck = self.shape['t_deck']
+        self.h_deck = self.shape['h_deck']
+
+        m = random.uniform(0, 1)
+
+        yz = np.array([
+            [(self.w_deck / 2 - m), (self.h_deck)],
+            [(self.w_deck / 2), (self.h_deck + self.t_deck / 2)],
+            [(self.w_deck / 2 - m), (self.h_deck + self.t_deck)],
+            [-(self.w_deck / 2 - m), (self.h_deck + self.t_deck)],
+            [-(self.w_deck / 2), (self.h_deck + self.t_deck / 2)],
+            [-(self.w_deck / 2 - m), (self.h_deck)]
+        ])
+
+        self.yz = yz
+        self.setMember()

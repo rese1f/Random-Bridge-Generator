@@ -13,3 +13,4 @@ def hollow(big_obj, small_obj):
     # blender need first choose the object, then delete
     small_obj.select_set(True)
     bpy.ops.object.delete()
+
