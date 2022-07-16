@@ -759,7 +759,6 @@ class Cable(SuperStructure):
 class SubStructure:
     def __init__(self):
         self.column = None
-        self.cable_function = [0, 0, 0, 0, 0, 0]
 
 class Column(SubStructure):
     def __init__(self, w_column, h_column, t_column, l_column, h_deck_t, t_deck, name):
@@ -771,6 +770,7 @@ class Column(SubStructure):
         self.H_deck = h_deck_t
         self.T_deck = t_deck
         self.name = name
+        self.cable_function = [0, 0, 0, 0, 0, 0]
 
     def A1(self):
         cfg_start = setColumnBasic(self.W_column, self.H_column, self.T_column, self.H_deck, self.T_deck) 
