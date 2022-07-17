@@ -42,17 +42,7 @@ In our definition,
 In [member.py](BridgeGenerator/Member/member.py), the superclass ```Member``` is defined as an abstract class that represents the common attributes and methods of each concrete "member".
 #### member's attributes
 
-<style>
-table th:first-of-type {
-    width: 30%;
-}
-table th:nth-of-type(2) {
-    width: 20%;
-}
-table th:nth-of-type(3) {
-    width: 50%;
-}
-</style>
+
 We use cfg to define the name and shape of each different shape. The cfg file should be a dictionary with the following format.
 ```python
 cfg = {
@@ -90,17 +80,7 @@ Attribute|Data Type|Meaning
 `obj`|`bpy.types.Object`|The corresponding blender object with the specific shape.
 
 #### member's methods
-<style>
-table th:first-of-type {
-    width: 20%;
-}
-table th:nth-of-type(2) {
-    width: 20%;
-}
-table th:nth-of-type(3) {
-    width: 60%;
-}
-</style>
+
 Methods|Usage
 :-:|:-:
 `showCrossSection()`|An helper method returns the cross-sectional view of the object
