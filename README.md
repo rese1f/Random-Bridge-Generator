@@ -1,47 +1,34 @@
+[toc]
 # BridgeGenerator
 
-## Cross Section
+## Definition
+In our definition, 
+* [**Member**](BridgeGenerator/Member) is the basic structure part with some basic shapes, e.g. rectangle, circle, or I-shape. **(TBD)**
+* **Component** can be simply divided into four major types -- superstructure, substructure, deck and surface feature. Each of them can be assembled by the basic members. **(TBD)**
+* **Bridge** is the assemble of different components, which should be in the form of real bridge. **(TBD)**
 
-### Get start
-
-```python
-    from BridgeGenerator import Member
-
-    if __name__ == '__main__':
-        cfg = './BridgeGenerator/Member/configs/w_beam.yaml'
-        w_beam = Member.wBeam(cfg)
+## Code Structure
+``` bash
+├── BridgeGenerator
+│   ├── Bridge
+│   │   ├── __init__.py
+│   │   └── bridge.py
+│   ├── Components
+│   │   ├── __init__.py
+│   │   └── components.py
+│   ├── Member
+│   │   ├── __init__.py
+│   │   ├── cfg.py
+│   │   ├── member.py
+│   │   └── utils.py
+│   ├── __init__.py
+│   ├── main.py
+│   ├── test_chj.py
+│   └── test_rwh.py
 ```
 
-### Add your own cross-section
-
-1. Create a .py file and define a class in `./BridgeGenerator/CrossSection/`
-
-```python
-    from .base import Member
-
-    class ClassName(Member):
-        def __init__(self, cfg):
-            super().__init__(cfg)
-            self.shape_parameter = ...
-
-        def __call__(self):
-            yz = ...
-            return yz
-```
-
-2. Add your class in `./BridgeGenerator/CrossSection/__init__.py` to make sure it can be imported
-
-```python
-from .FileName import ClassName
-```
-
-3. Create a .yaml file and define the shape parameter in `./BridgeGenerator/CrossSection/configs/` as an example
-
-```yaml
-    name: wBeam
-    shape: 
-        Flange length: 1 #b
-        Web length: 1 # h
-        Flange thickness: 1 # tf
-        Web thickness: 1 # tw
-```
+## Package
+### member
+In [member.py](BridgeGenerator/Member/member.py), the superclass ```Member``` is defined as an abstract class that represents the common attributes and methods of each concrete "member".
+|1|2|3|
+|---|---|---|

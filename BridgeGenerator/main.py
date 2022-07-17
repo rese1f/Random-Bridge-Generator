@@ -3,9 +3,9 @@ cp = bpy.data.texts["components.py"].as_module()
 
 if __name__ == '__main__':
     # Random
-    ### YOUR CODE HERE
+    ### YOUR CODE HERE ###
 
-    ### CODE END
+    ### CODE END HERE ###
 
     # Initialize structures
     superStructure = cp.SuperStructure()
