@@ -1,47 +1,93 @@
+- [BridgeGenerator](#bridgegenerator)
+  - [Definition](#definition)
+  - [Code Structure](#code-structure)
+  - [Package](#package)
+    - [Member](#member)
+      - [member's attributes](#members-attributes)
+      - [member's methods](#members-methods)
+    - [Component](#component)
+    - [Bridge](#bridge)
+  - [Tutorial](#tutorial)
+
 # BridgeGenerator
 
-## Cross Section
+## Definition
+In our definition, 
+* [**Member**](BridgeGenerator/Member) is the basic structure part with some basic shapes, e.g. rectangle, circle, or I-shape. **(TBD)**
+* [**Component**](BridgeGenerator/Component) can be simply divided into four major types -- superstructure, substructure, deck and surface feature. Each of them can be assembled by the basic members. **(TBD)**
+* [**Bridge**](BridgeGenerator/Bridge) is the assemble of different components, which should be in the form of real bridge. **(TBD)**
 
-### Get start
+## Code Structure
+``` bash
+├── BridgeGenerator
+│   ├── Bridge
+│   │   ├── __init__.py
+│   │   └── bridge.py
+│   ├── Components
+│   │   ├── __init__.py
+│   │   └── components.py
+│   ├── Member
+│   │   ├── __init__.py
+│   │   ├── cfg.py
+│   │   ├── member.py
+│   │   └── utils.py
+│   ├── __init__.py
+│   ├── main.py
+│   ├── test_chj.py
+│   └── test_rwh.py
+```
 
+## Package
+### Member
+In [member.py](BridgeGenerator/Member/member.py), the superclass ```Member``` is defined as an abstract class that represents the common attributes and methods of each concrete "member".
+#### member's attributes
+
+
+We use cfg to define the name and shape of each different shape. The cfg file should be a dictionary with the following format.
 ```python
-    from BridgeGenerator import Member
-
-    if __name__ == '__main__':
-        cfg = './BridgeGenerator/Member/configs/w_beam.yaml'
-        w_beam = Member.wBeam(cfg)
+cfg = {
+    'name': xxx,
+    'shape': {
+        'detail1': ,
+        'detail2': ,
+        ...
+    }
+}
 ```
-
-### Add your own cross-section
-
-1. Create a .py file and define a class in `./BridgeGenerator/CrossSection/`
-
+As an example, the configuration for rectangle is
 ```python
-    from .base import Member
-
-    class ClassName(Member):
-        def __init__(self, cfg):
-            super().__init__(cfg)
-            self.shape_parameter = ...
-
-        def __call__(self):
-            yz = ...
-            return yz
+rectangle_cfg = {
+    'name': rectangle,
+    'shape': {
+        'Flange length': 2,
+        'Web length': 1,
+    }
+}
 ```
+The other attributes are given in the table.
 
-2. Add your class in `./BridgeGenerator/CrossSection/__init__.py` to make sure it can be imported
+Attribute|Data Type|Meaning
+:-:|:-:|:-:
+`name` | `str` |The name of the shape.
+`shape`| `dict()` |A dictionary that includes all the parameters of the shape.
+`yz`|2d `numpy.ndarray`|The coordination of one cross-section for the shape in the yz-plane.
+`f`||The collection of the faces of the object.
+`v`||The collection of the vertices of the object.
+`n`||The number of cross-sections.
+`t`||The translation for the cross-sections.
+`r`||The rotation for the cross-sections.
+`npts`|`int`|The number of points in one cross-section.
+`obj`|`bpy.types.Object`|The corresponding blender object with the specific shape.
 
-```python
-from .FileName import ClassName
-```
+#### member's methods
 
-3. Create a .yaml file and define the shape parameter in `./BridgeGenerator/CrossSection/configs/` as an example
+Methods|Usage
+:-:|:-:
+`showCrossSection()`|An helper method returns the cross-sectional view of the object
+`createObj(name)`|Create a blender object with the input `name`.
+**should be some get and set methods here ...**|
+### Component
 
-```yaml
-    name: wBeam
-    shape: 
-        Flange length: 1 #b
-        Web length: 1 # h
-        Flange thickness: 1 # tf
-        Web thickness: 1 # tw
-```
+### Bridge
+
+## [Tutorial](BridgeGenerator/tutorial.md)

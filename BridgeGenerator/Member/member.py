@@ -35,14 +35,17 @@ class Member:
         self.shape = self.cfg['shape']
 
         self.yz = None
-        self.type = None
 
         self.f = None
         self.v = None
         self.n = n
         self.t = t
-        self.quat = quat
-        self.r = None
+        
+        if quat is None:
+            quat = np.zeros((self.n, 4))
+            quat[:, 3] = 1.  # quaternion is (x,y,z,w)
+        self.r = R.from_quat(quat)
+    
         self.npts = 0
 
         self.obj = None
@@ -106,7 +109,7 @@ class Member:
         plt.xlabel('y')
         plt.ylabel('z')
         plt.axis('equal')
-        plt.title("Cross-section of {}, {:d} points".format(self.type, self.yz.shape[0]))
+        plt.title("Cross-section of {}, {:d} points".format(self.name, self.yz.shape[0]))
         plt.show()
 
     def createObj(self, name, obj_num=1):
@@ -142,7 +145,6 @@ class Rectangle(Member):
         super().__init__(cfg, n, t, quat)
         self.b = self.shape['Flange length']
         self.h = self.shape['Web length']
-        self.type = "Rectangle"
 
         # Initialize an empty array for 12 vertices
         # Possible absolute value(s) for y
