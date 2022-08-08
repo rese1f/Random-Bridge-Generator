@@ -66,16 +66,16 @@ rectangle_cfg = {
 ```
 The other attributes are given in the table.
 
-Attribute|Data Type|Meaning
+Attribute|Data Type|Description
 :-:|:-:|:-:
 `name` | `str` |The name of the shape.
-`shape`| `dict()` |A dictionary that includes all the parameters of the shape.
-`yz`|2d `numpy.ndarray`|The coordination of one cross-section for the shape in the yz-plane.
-`f`||The collection of the faces of the object.
-`v`||The collection of the vertices of the object.
-`n`||The number of cross-sections.
-`t`||The translation for the cross-sections.
-`r`||The rotation for the cross-sections.
+`shape`| `dict` |A dictionary that includes all the parameters of the shape.
+`yz`|`2d numpy.ndarray`|The coordination of one cross-section for the shape in the yz-plane.
+`faces`||The collection of the faces of the object.
+`vertices`||The collection of the vertices of the object.
+`cs_num`||The number of cross-sections.
+`translation`||The translation for the cross-sections.
+`rotation`||The rotation for the cross-sections.
 `npts`|`int`|The number of points in one cross-section.
 `obj`|`bpy.types.Object`|The corresponding blender object with the specific shape.
 
