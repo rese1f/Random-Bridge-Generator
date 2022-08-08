@@ -26,9 +26,23 @@ rectangle_cfg = {
 }
 rectangle = mb.Rectangle(rectangle_cfg)
 ```
-## 3. Random Bridge Generator
 
-### 3.1. Set CFG Dictionary
+## 3. Run Python script from the command line
+The following demonstration is done on Windows.
+
+Firstly, go to the directory where Blender is installed.
+```bash
+cd c:\<blender installation directory> # Replace the content in <> 
+```
+Use `blender [args ...] [file] [args ...]` to use Blender in command line.
+
+For Python, to run the Python script file. Use `-P`, `--python` `<filepath>`
+```bash
+blender -P G:\srpp\Synthetic-Structural-Benchmark\BridgeGenerator\test_chj.py
+```
+## 4. Random Bridge Generator
+
+### 4.1. Set CFG Dictionary
 
 CFG dictionary consists of the basis parameters for future construction. It has two keys: “name” (the model that these parameters are applied to), and “shape” (all the parameters’ name together with their value). For example, the CFG dictionary for deck is called **`setDeckBasic`**, and it is constructed as
 ``` python
