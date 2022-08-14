@@ -1,3 +1,4 @@
+- [Pull Request](#pull-request)
 - [BridgeGenerator](#bridgegenerator)
   - [Definition](#definition)
   - [Code Structure](#code-structure)
@@ -8,6 +9,9 @@
     - [Component](#component)
     - [Bridge](#bridge)
   - [Tutorial](#tutorial)
+
+# Pull Request
+Fork the origin repo, and then make some changes, finally submit a pull request.
 
 # BridgeGenerator
 
