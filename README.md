@@ -40,7 +40,7 @@ In our definition,
 │   ├── test_chj.py
 │   └── test_rwh.py
 ```
-
+111
 ## Package
 ### Member
 In [member.py](BridgeGenerator/Member/member.py), the superclass ```Member``` is defined as an abstract class that represents the common attributes and methods of each concrete "member".
